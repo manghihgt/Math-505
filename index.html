@@ -14,17 +14,24 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 
   <style>
     :root {
-      --k-purple: #46178f;
-      --k-purple-dark: #250850;
-      --k-red: #eb670f;
-      --k-blue: #1368ce;
-      --k-yellow: #d89e00;
-      --k-green: #26890c;
-      --glass: rgba(255, 255, 255, 0.15);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --gh-bg: #0d1117;
+      --gh-nav: rgba(13, 17, 23, 0.7);
+      --gh-green: #238636;
+      --gh-green-hover: #2ea043;
+      --gh-border: rgba(48, 54, 61, 0.7);
+      --gh-text: #c9d1d9;
+      --gh-accent: #79c0ff;
+      --cosmic-glow: radial-gradient(circle at bottom center, rgba(121, 192, 255, 0.15), transparent 70%);
+      --k-red: #da3633;
+      --k-blue: #1f6feb;
+      --k-yellow: #d29922;
+      --k-green: #238636;
+      --glass: rgba(22, 27, 34, 0.8);
+      --glass-border: rgba(48, 54, 61, 0.8);
     }
 
     * {
@@ -34,76 +41,86 @@
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
-      background: radial-gradient(circle at top right, var(--k-purple), var(--k-purple-dark));
-      color: white;
+      font-family: 'Inter', 'Outfit', sans-serif;
+      background-color: var(--gh-bg);
+      background-image:
+        var(--cosmic-glow),
+        radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+      color: var(--gh-text);
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     /* --- NAVBAR --- */
     .navbar {
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(10px);
-      padding: 1rem 2rem;
+      background: var(--gh-nav);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0.8rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--gh-border);
     }
 
     .nav-logo {
-      font-size: 1.8rem;
-      font-weight: 900;
-      letter-spacing: -1px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .nav-links {
       display: flex;
-      gap: 2rem;
+      gap: 1.5rem;
       align-items: center;
     }
 
     .nav-item {
       cursor: pointer;
-      font-weight: 600;
-      opacity: 0.8;
-      transition: 0.3s;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--gh-text);
+      transition: 0.2s;
     }
 
     .nav-item:hover {
-      opacity: 1;
+      color: var(--gh-accent);
     }
 
     .lang-toggle {
-      background: var(--glass);
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: 1px solid var(--gh-border);
       cursor: pointer;
+      color: white;
     }
 
     /* --- PAGES --- */
     .page-content {
-      padding: 4rem 2rem;
+      padding: 5rem 2rem;
       max-width: 1200px;
       margin: 0 auto;
       text-align: center;
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px) saturate(180%);
-      -webkit-backdrop-filter: blur(15px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 24px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--gh-border);
+      border-radius: 12px;
       padding: 3rem;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     }
 
     /* --- AUTH & LOBBY --- */
@@ -115,57 +132,89 @@
       min-height: 80vh;
     }
 
+    .hero-title {
+      font-size: 4.5rem;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to bottom, #fff, var(--gh-text));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
     .auth-card {
-      background: white;
+      background: var(--glass);
       padding: 2.5rem;
-      border-radius: 20px;
+      border: 1px solid var(--gh-border);
+      border-radius: 12px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      max-width: 440px;
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
+      gap: 1rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: left;
+    }
+
+    .input-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gh-text);
+      opacity: 0.8;
     }
 
     .input-group input {
       width: 100%;
-      padding: 1.2rem;
-      border: 2px solid #eee;
-      border-radius: 12px;
-      font-size: 1.2rem;
-      text-align: center;
-      font-family: 'Inter', sans-serif;
-      transition: 0.3s;
+      padding: 0.8rem 1rem;
+      background: #0d1117;
+      border: 1px solid var(--gh-border);
+      border-radius: 6px;
+      font-size: 1rem;
+      color: white;
+      transition: 0.2s;
     }
 
     .input-group input:focus {
-      border-color: var(--k-purple);
+      border-color: var(--gh-accent);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(121, 192, 255, 0.1);
     }
 
     .k-btn {
-      padding: 1.2rem;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.3rem;
-      font-weight: 800;
+      padding: 0.8rem 1.5rem;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      background: var(--k-blue);
+      background: var(--gh-green);
       color: white;
-      transition: 0.2s transform;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .k-btn:hover {
-      transform: translateY(-3px);
-      filter: brightness(1.1);
+      background: var(--gh-green-hover);
     }
 
-    .k-btn:active {
-      transform: scale(0.98);
+    .k-btn.ghost {
+      background: transparent;
+      border-color: var(--gh-border);
+      color: white;
     }
 
-    .k-btn.black {
-      background: #333;
+    .k-btn.ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: #8b949e;
     }
 
     /* --- GAMEPLAY --- */
@@ -176,13 +225,14 @@
     }
 
     .q-header {
-      background: white;
-      color: black;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--gh-border);
+      color: white;
       padding: 3rem 2rem;
       font-size: 2.5rem;
-      font-weight: 900;
+      font-weight: 800;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     .game-mid {
@@ -225,13 +275,14 @@
     }
 
     .formula-box {
-      background: white;
-      color: black;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--gh-border);
+      color: white;
       padding: 3rem 5rem;
-      border-radius: 20px;
+      border-radius: 12px;
       font-size: 3.5rem;
       font-family: monospace;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     }
 
     .ans-grid {
@@ -286,7 +337,8 @@
     .results-overlay {
       position: fixed;
       inset: 0;
-      background: var(--k-purple);
+      background: var(--gh-bg);
+      background-image: var(--cosmic-glow);
       z-index: 200;
       display: flex;
       flex-direction: column;
@@ -296,11 +348,11 @@
     }
 
     .correct-bg {
-      background: var(--k-green);
+      background: radial-gradient(circle, rgba(35, 134, 54, 0.3) 0%, var(--gh-bg) 100%);
     }
 
     .incorrect-bg {
-      background: var(--k-red);
+      background: radial-gradient(circle, rgba(218, 54, 51, 0.3) 0%, var(--gh-bg) 100%);
     }
 
     .results-title {
@@ -426,14 +478,21 @@
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
-    const socket = io('http://localhost:3001');
 
     const App = () => {
-      const [page, setPage] = useState('home'); // home, about, game
-      const [view, setView] = useState('join');
-      const [gameState, setGameState] = useState('idle'); // idle, lobby, playing, round_results, results
-      const [roomId, setRoomId] = useState('');
+      // Get URL params for auto-join
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramRoom = urlParams.get('room');
+      const paramHost = urlParams.get('host');
+
+      const [serverIp, setServerIp] = useState(paramHost || localStorage.getItem('math_server_ip') || 'localhost');
+      const [socket, setSocket] = useState(null);
+      const [page, setPage] = useState('home');
+      const [view, setView] = useState(paramRoom ? 'join' : 'join');
+      const [gameState, setGameState] = useState('idle');
+      const [roomId, setRoomId] = useState(paramRoom || '');
       const [username, setUsername] = useState('');
+      const [webhookUrl, setWebhookUrl] = useState(localStorage.getItem('math_webhook_url') || '');
       const [players, setPlayers] = useState([]);
       const [currentQ, setCurrentQ] = useState(null);
       const [timeRemaining, setTimeRemaining] = useState(30);
@@ -445,17 +504,24 @@
       const [lang, setLang] = useState('TH');
       const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
 
-      // SOUNDS (Simulated using HTML tags for single file compatibility)
-      const playSound = (type) => {
-        // In a real app, you'd use actual local files or links
-        console.log(`Playing sound: ${type}`);
-      };
+      const qrRef = useRef(null);
+
+      // Handle Socket connection
+      useEffect(() => {
+        if (!serverIp) return;
+        const newSocket = io(`http://${serverIp}:3001`, { transposition: false });
+        setSocket(newSocket);
+        localStorage.setItem('math_server_ip', serverIp);
+
+        return () => newSocket.close();
+      }, [serverIp]);
 
       useEffect(() => {
+        if (!socket) return;
+
         socket.on('room_created', (id) => {
           setRoomId(id);
           setGameState('lobby');
-          playSound('lobby-music');
         });
 
         socket.on('player_joined', (p) => setPlayers(p));
@@ -487,11 +553,6 @@
         socket.on('round_results', (data) => {
           setRoundData(data);
           setGameState('round_results');
-          // Check if I was correct
-          if (view === 'join' && hasAnswered) {
-            // Correctness check is server-side usually, but we can infer or pass it
-            // For now we'll just show the distribution
-          }
         });
 
         socket.on('game_over', (res) => {
@@ -500,21 +561,35 @@
           confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
         });
 
-        return () => socket.removeAllListeners();
-      }, [players, view, hasAnswered]);
+        return () => socket.off();
+      }, [socket, players.length]);
+
+      // QR Code Generation
+      useEffect(() => {
+        if (gameState === 'lobby' && view === 'host' && qrRef.current && roomId) {
+          const joinUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}&host=${serverIp}`;
+          QRCode.toCanvas(qrRef.current, joinUrl, { width: 200, margin: 2 }, (error) => {
+            if (error) console.error(error);
+          });
+        }
+      }, [gameState, view, roomId, serverIp]);
 
       useEffect(() => {
         let timer;
         if (gameState === 'playing' && timeRemaining > 0 && !hasAnswered) {
           timer = setInterval(() => setTimeRemaining(t => t - 1), 1000);
-        } else if (timeRemaining === 0 && gameState === 'playing') {
-          // Time's up handled by server triggered results usually
         }
         return () => clearInterval(timer);
       }, [gameState, timeRemaining, hasAnswered]);
 
-      const join = () => { if (username && roomId) socket.emit('join_room', { roomId, username }); };
-      const create = () => { setView('host'); socket.emit('create_room'); };
+      const join = () => { if (username && roomId && socket) socket.emit('join_room', { roomId, username }); };
+      const create = () => {
+        setView('host');
+        if (socket) {
+          socket.emit('create_room', { webhookUrl });
+          localStorage.setItem('math_webhook_url', webhookUrl);
+        }
+      };
       const start = () => socket.emit('start_game', roomId);
       const next = () => socket.emit('next_question_request', roomId);
       const submit = (i) => {
@@ -530,7 +605,9 @@
           pin: "รหัสห้อง (PIN)", nick: "ชื่อเล่น", start: "เริ่มเกม",
           connecting: "กำลังเชื่อมต่อ...", waiting: "รอโฮสต์เริ่มเกม...",
           players: "ผู้เล่นคนอื่นๆ", next: "ถัดไป", results: "ผลการจัดอันดับ",
-          correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ"
+          correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ",
+          server_ip: "เลข IP เครื่องเซิร์ฟเวอร์ (สำหรับมือถือ)",
+          webhook_label: "Discord Webhook (สำหรับแจ้งเตือนคนเข้า)"
         },
         EN: {
           home: "Home", about: "About", lang: "TH",
@@ -538,7 +615,9 @@
           pin: "Game PIN", nick: "Nickname", start: "Start",
           connecting: "Connecting...", waiting: "Waiting for host...",
           players: "Players", next: "Next", results: "Rankings",
-          correct: "Correct!", incorrect: "Wrong!", podium: "Final Ranking"
+          correct: "Correct!", incorrect: "Wrong!", podium: "Final Ranking",
+          server_ip: "Server IP (for mobile support)",
+          webhook_label: "Discord Webhook URL (for notifications)"
         }
       }[lang];
 
@@ -579,25 +658,42 @@
           {gameState === 'idle' && (
             <div className="auth-container animate">
               <div className="float" style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '5rem', fontWeight: 900, textShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>Kahoot!</h1>
+                <h1 className="hero-title">MATH 5/5</h1>
+                <p style={{ fontSize: '1.2rem', opacity: 0.7, maxWidth: '600px', margin: '0 auto' }}>
+                  {lang === 'TH' ? 'ยกระดับการเรียนรู้คณิตศาสตร์ด้วยแพลตฟอร์มการแข่งขันแบบเรียลไทม์' : 'Accelerate math learning with a real-time collaborative platform.'}
+                </p>
               </div>
               <div className="auth-card">
                 {view === 'join' ? (
                   <>
                     <div className="input-group">
-                      <input placeholder={t.pin} value={roomId} onChange={e => setRoomId(e.target.value)} />
+                      <span className="input-label">{t.pin}</span>
+                      <input placeholder="1234" value={roomId} onChange={e => setRoomId(e.target.value)} />
                     </div>
                     <div className="input-group">
-                      <input placeholder={t.nick} value={username} onChange={e => setUsername(e.target.value)} />
+                      <span className="input-label">{t.nick}</span>
+                      <input placeholder="Ex. John" value={username} onChange={e => setUsername(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <span className="input-label">{t.server_ip}</span>
+                      <input placeholder="localhost" value={serverIp} onChange={e => setServerIp(e.target.value)} style={{ fontSize: '0.9rem', opacity: 0.7 }} />
                     </div>
                     <button className="k-btn" onClick={join}>{t.enter}</button>
-                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold' }} onClick={create}>หรือสร้างห้องใหม่?</p>
+                    <button className="k-btn ghost" onClick={create}>{lang === 'TH' ? 'หรือสร้างห้องใหม่?' : 'Or create a new room?'}</button>
                   </>
                 ) : (
                   <>
-                    <h2 style={{ color: '#333', textAlign: 'center' }}>{t.host}</h2>
+                    <h2 style={{ color: 'white', textAlign: 'center', marginBottom: '1rem' }}>{t.host}</h2>
+                    <div className="input-group">
+                      <p className="input-label">{t.server_ip}</p>
+                      <input placeholder="Host IP (e.g. 192.168.1.50)" value={serverIp} onChange={e => setServerIp(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <p className="input-label">{t.webhook_label}</p>
+                      <input placeholder="Discord Webhook URL" value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)} />
+                    </div>
                     <button className="k-btn" onClick={create}>Generate GAME PIN</button>
-                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => setView('join')}>เข้าร่วมในฐานะผู้เล่น?</p>
+                    <button className="k-btn ghost" onClick={() => setView('join')}>{lang === 'TH' ? 'เข้าร่วมในฐานะผู้เล่น?' : 'Join as a player?'}</button>
                   </>
                 )}
               </div>
@@ -606,8 +702,17 @@
 
           {gameState === 'lobby' && (
             <div className="page-content animate">
-              <div className="glass-card">
-                <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{view === 'host' ? `GAME PIN: ${roomId}` : t.waiting}</h1>
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+                <div>
+                  <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{view === 'host' ? `GAME PIN: ${roomId}` : t.waiting}</h1>
+                  {view === 'host' && (
+                    <div style={{ background: 'white', padding: '1rem', borderRadius: '12px', display: 'inline-block' }}>
+                      <canvas ref={qrRef}></canvas>
+                      <p style={{ color: 'black', fontWeight: 'bold', marginTop: '10px' }}>สแกนเพื่อเข้าเล่น!</p>
+                    </div>
+                  )}
+                </div>
+
                 {view === 'host' && (
                   <button className="k-btn" style={{ padding: '1.5rem 5rem' }} onClick={start} disabled={players.length === 0}>{t.start}</button>
                 )}
