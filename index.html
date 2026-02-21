@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kahoot! Math Master</title>
+  <title>MATH 5/5 Quiz Game</title>
 
   <!-- Fonts & CDNs -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;700&display=swap"
@@ -97,11 +97,13 @@
     }
 
     .glass-card {
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 24px;
       padding: 3rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
 
     /* --- AUTH & LOBBY --- */
@@ -542,7 +544,7 @@
 
       const Navbar = () => (
         <nav className="navbar">
-          <div className="nav-logo" onClick={() => setPage('home')}>MATh! MASTER</div>
+          <div className="nav-logo" onClick={() => setPage('home')}>MATH 5/5</div>
           <div className="nav-links">
             <div className="nav-item" onClick={() => setPage('home')}>{t.home}</div>
             <div className="nav-item" onClick={() => setPage('about')}>{t.about}</div>
@@ -555,17 +557,16 @@
         <div>
           <Navbar />
           <div className="page-content animate">
-            <div className="glass-card">
-              <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>About Us</h1>
-              <p style={{ fontSize: '1.2rem', lineHeight: '1.8', maxWidth: '800px', margin: '0 auto' }}>
-                พวกเราคือทีมผู้พัฒนาที่หลงใหลในคณิตศาสตร์และการศึกษา! <br />
-                เกมนี้ถูกสร้างขึ้นเพื่อให้น้องๆ ได้ฝึกทักษะเรื่อง "ลำดับและอนุกรม" ผ่านความตื่นเต้นเร้าใจในรูปแบบ Kahoot!
-              </p>
-              <div style={{ marginTop: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-                <div className="lb-item"><div>Developer</div> <b>Mangz</b></div>
-                <div className="lb-item"><div>Math Specialist</div> <b>Kru Math</b></div>
+            <div className="glass-card" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <h1 style={{ fontSize: '3rem', marginBottom: '2rem', textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>สมาชิกกลุ่ม Math 5/5</h1>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+                <div className="lb-item">นายกรณ์มิษฐ์ อินดา</div>
+                <div className="lb-item">นายนพกิจ สุรินทร์ต๊ะ</div>
+                <div className="lb-item">นายวุฒิภัทร จ่าหย่อง</div>
+                <div className="lb-item">นายสุริยะทิตย์ สุริยะวงค์</div>
+                <div className="lb-item">นายจตุรงค์ กิจโชคประเสริฐ</div>
               </div>
-              <button className="k-btn black" style={{ marginTop: '3rem' }} onClick={() => setPage('home')}>Go Back</button>
+              <button className="k-btn black" style={{ marginTop: '3rem', padding: '1rem 3rem' }} onClick={() => setPage('home')}>ย้อนกลับ</button>
             </div>
           </div>
         </div>
@@ -658,7 +659,10 @@
               {view === 'join' ? (
                 <div style={{ textAlign: 'center' }}>
                   <div className="results-title">{lastAnswerCorrect ? t.correct : t.incorrect}</div>
-                  <p style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Current Rank: {roundData.leaderboard.findIndex(p => p.username === username) + 1}</p>
+                  <div style={{ background: 'white', color: 'black', padding: '1rem', borderRadius: '10px', marginBottom: '1rem', fontSize: '1.5rem' }}>
+                    เฉลย: {currentQ?.options[roundData?.correctAnswer]}
+                  </div>
+                  <p style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>อันดับปัจจุบัน: {roundData.leaderboard.findIndex(p => p.username === username) + 1}</p>
                 </div>
               ) : (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
