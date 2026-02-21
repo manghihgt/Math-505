@@ -4,9 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kahoot! Math Quiz</title>
+  <title>Kahoot! Math Master</title>
 
-  <!-- Dependencies (CDN) -->
+  <!-- Fonts & CDNs -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;700&display=swap"
+    rel="stylesheet">
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -15,214 +17,404 @@
 
   <style>
     :root {
-      --kahoot-purple: #46178f;
-      --kahoot-dark: #250850;
-      --kahoot-red: #eb670f;
-      --kahoot-blue: #1368ce;
-      --kahoot-yellow: #d89e00;
-      --kahoot-green: #26890c;
+      --k-purple: #46178f;
+      --k-purple-dark: #250850;
+      --k-red: #eb670f;
+      --k-blue: #1368ce;
+      --k-yellow: #d89e00;
+      --k-green: #26890c;
+      --glass: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background-color: var(--kahoot-purple);
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at top right, var(--k-purple), var(--k-purple-dark));
       color: white;
-      margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* --- UI COMPONENTS --- */
-    .kahoot-auth {
-      flex: 1;
+    /* --- NAVBAR --- */
+    .navbar {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .nav-logo {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      cursor: pointer;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-item {
+      cursor: pointer;
+      font-weight: 600;
+      opacity: 0.8;
+      transition: 0.3s;
+    }
+
+    .nav-item:hover {
+      opacity: 1;
+    }
+
+    .lang-toggle {
+      background: var(--glass);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+    }
+
+    /* --- PAGES --- */
+    .page-content {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 3rem;
+    }
+
+    /* --- AUTH & LOBBY --- */
+    .auth-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--kahoot-purple), var(--kahoot-dark));
+      min-height: 80vh;
     }
 
     .auth-card {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      width: 90%;
+      padding: 2.5rem;
+      border-radius: 20px;
+      width: 100%;
       max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      gap: 1.2rem;
     }
 
-    .kahoot-input {
+    .input-group input {
       width: 100%;
-      padding: 1rem;
-      border: 2px solid #ddd;
-      border-radius: 8px;
+      padding: 1.2rem;
+      border: 2px solid #eee;
+      border-radius: 12px;
       font-size: 1.2rem;
       text-align: center;
-      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      transition: 0.3s;
     }
 
-    .kahoot-btn {
-      padding: 1rem;
+    .input-group input:focus {
+      border-color: var(--k-purple);
+      outline: none;
+    }
+
+    .k-btn {
+      padding: 1.2rem;
       border: none;
-      border-radius: 8px;
-      font-size: 1.2rem;
-      font-weight: bold;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: 800;
       cursor: pointer;
-      background: var(--kahoot-blue);
+      background: var(--k-blue);
       color: white;
-      transition: 0.2s;
+      transition: 0.2s transform;
     }
 
-    .kahoot-btn.black {
+    .k-btn:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.1);
+    }
+
+    .k-btn:active {
+      transform: scale(0.98);
+    }
+
+    .k-btn.black {
       background: #333;
     }
 
-    .kahoot-btn:hover {
-      filter: brightness(1.1);
-      transform: scale(1.02);
+    /* --- GAMEPLAY --- */
+    .game-view {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 70px);
     }
 
-    /* --- GAMEPLAY --- */
-    .question-header {
+    .q-header {
       background: white;
       color: black;
-      padding: 2rem;
-      font-size: 2rem;
-      font-weight: 800;
+      padding: 3rem 2rem;
+      font-size: 2.5rem;
+      font-weight: 900;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
-    .middle-section {
+    .game-mid {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: space-around;
       padding: 2rem;
-      background: #f2f2f2;
-      color: black;
+      position: relative;
     }
 
-    .stat-circle {
-      width: 80px;
-      height: 80px;
+    /* Time Bar */
+    .time-bar-container {
+      height: 12px;
+      background: rgba(0, 0, 0, 0.1);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .time-bar {
+      height: 100%;
+      background: var(--k-blue);
+      transition: width 1s linear;
+    }
+
+    .stat-box {
+      font-size: 3rem;
+      font-weight: 900;
+      background: white;
+      color: var(--k-purple);
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      border: 5px solid var(--kahoot-purple);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      font-weight: 900;
+      border: 4px solid var(--k-purple);
     }
 
-    .formula-card {
+    .formula-box {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      font-size: 2.5rem;
+      color: black;
+      padding: 3rem 5rem;
+      border-radius: 20px;
+      font-size: 3.5rem;
       font-family: monospace;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 
     .ans-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      background: #f2f2f2;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .ans-btn {
-      padding: 2rem;
+      padding: 3rem;
       border: none;
-      font-size: 1.5rem;
-      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1.8rem;
+      font-weight: 800;
       color: white;
-      border-radius: 4px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
+      transition: 0.2s;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .ans-btn:hover {
+      filter: brightness(1.1);
+      transform: scale(1.01);
     }
 
     .ans-btn.red {
-      background: var(--kahoot-red);
+      background: var(--k-red);
     }
 
     .ans-btn.blue {
-      background: var(--kahoot-blue);
+      background: var(--k-blue);
     }
 
     .ans-btn.yellow {
-      background: var(--kahoot-yellow);
+      background: var(--k-yellow);
     }
 
     .ans-btn.green {
-      background: var(--kahoot-green);
+      background: var(--k-green);
     }
 
-    /* --- PODIUM --- */
-    .podium-container {
+    .shape {
+      font-size: 2.5rem;
+    }
+
+    /* --- ROUND RESULTS --- */
+    .results-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--k-purple);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .correct-bg {
+      background: var(--k-green);
+    }
+
+    .incorrect-bg {
+      background: var(--k-red);
+    }
+
+    .results-title {
+      font-size: 5rem;
+      font-weight: 900;
+      margin-bottom: 2rem;
+    }
+
+    .chart-container {
       display: flex;
       align-items: flex-end;
-      justify-content: center;
-      gap: 1rem;
+      gap: 2rem;
       height: 300px;
       margin-top: 2rem;
     }
 
-    .podium-bar {
-      width: 80px;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
+    .chart-bar {
+      width: 100px;
       border-radius: 8px 8px 0 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      transition: height 1s ease-out;
     }
 
-    .place-1 .podium-bar {
-      height: 200px;
-      background: gold;
-      color: black;
+    .chart-label {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 1.5rem;
     }
 
-    .place-2 .podium-bar {
-      height: 150px;
-      background: silver;
-      color: black;
+    .chart-count {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 900;
+      font-size: 1.5rem;
     }
 
-    .place-3 .podium-bar {
-      height: 100px;
-      background: #cd7f32;
-      color: black;
+    .round-lb {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 4rem;
     }
 
-    .lobby-view {
-      flex: 1;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .player-grid {
+    .lb-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.2rem;
     }
 
-    .player-tag {
-      background: white;
-      color: black;
-      padding: 0.5rem 1.5rem;
-      border-radius: 20px;
-      font-weight: bold;
+    .lb-rank {
+      font-weight: 900;
+      opacity: 0.5;
+      width: 30px;
+    }
+
+    /* --- ANIMATIONS --- */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .float {
+      animation: bounce 3s ease-in-out infinite;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      .ans-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .formula-box {
+        font-size: 2rem;
+        padding: 2rem;
+      }
+
+      .q-header {
+        font-size: 1.5rem;
+      }
+
+      .chart-bar {
+        width: 50px;
+      }
     }
   </style>
 </head>
@@ -235,8 +427,9 @@
     const socket = io('http://localhost:3001');
 
     const App = () => {
+      const [page, setPage] = useState('home'); // home, about, game
       const [view, setView] = useState('join');
-      const [gameState, setGameState] = useState('idle');
+      const [gameState, setGameState] = useState('idle'); // idle, lobby, playing, round_results, results
       const [roomId, setRoomId] = useState('');
       const [username, setUsername] = useState('');
       const [players, setPlayers] = useState([]);
@@ -244,24 +437,76 @@
       const [timeRemaining, setTimeRemaining] = useState(30);
       const [hasAnswered, setHasAnswered] = useState(false);
       const [answeredCount, setAnsweredCount] = useState(0);
+      const [totalPlayers, setTotalPlayers] = useState(0);
+      const [roundData, setRoundData] = useState(null);
       const [finalResults, setFinalResults] = useState([]);
+      const [lang, setLang] = useState('TH');
+      const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
+
+      // SOUNDS (Simulated using HTML tags for single file compatibility)
+      const playSound = (type) => {
+        // In a real app, you'd use actual local files or links
+        console.log(`Playing sound: ${type}`);
+      };
 
       useEffect(() => {
-        socket.on('room_created', (id) => { setRoomId(id); setGameState('lobby'); });
+        socket.on('room_created', (id) => {
+          setRoomId(id);
+          setGameState('lobby');
+          playSound('lobby-music');
+        });
+
         socket.on('player_joined', (p) => setPlayers(p));
-        socket.on('join_success', (data) => { setRoomId(data.roomId); setPlayers(data.players); setGameState('lobby'); });
+
+        socket.on('join_success', (data) => {
+          setRoomId(data.roomId);
+          setPlayers(data.players);
+          setGameState('lobby');
+        });
+
         socket.on('join_error', (err) => alert(err));
-        socket.on('next_question', (q) => { setCurrentQ(q); setTimeRemaining(q.time); setHasAnswered(false); setAnsweredCount(0); setGameState('playing'); });
-        socket.on('player_answered_update', (d) => setAnsweredCount(d.answeredCount));
-        socket.on('game_over', (res) => { setFinalResults(res); setGameState('results'); confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); });
-        socket.on('host_disconnected', () => { alert('Host disconnected'); window.location.reload(); });
+
+        socket.on('next_question', (q) => {
+          setCurrentQ(q);
+          setTimeRemaining(30);
+          setHasAnswered(false);
+          setAnsweredCount(0);
+          setTotalPlayers(players.length);
+          setGameState('playing');
+          setRoundData(null);
+          setLastAnswerCorrect(null);
+        });
+
+        socket.on('player_answered_update', (d) => {
+          setAnsweredCount(d.answeredCount);
+          setTotalPlayers(d.totalPlayers);
+        });
+
+        socket.on('round_results', (data) => {
+          setRoundData(data);
+          setGameState('round_results');
+          // Check if I was correct
+          if (view === 'join' && hasAnswered) {
+            // Correctness check is server-side usually, but we can infer or pass it
+            // For now we'll just show the distribution
+          }
+        });
+
+        socket.on('game_over', (res) => {
+          setFinalResults(res);
+          setGameState('results');
+          confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+        });
+
         return () => socket.removeAllListeners();
-      }, []);
+      }, [players, view, hasAnswered]);
 
       useEffect(() => {
         let timer;
         if (gameState === 'playing' && timeRemaining > 0 && !hasAnswered) {
           timer = setInterval(() => setTimeRemaining(t => t - 1), 1000);
+        } else if (timeRemaining === 0 && gameState === 'playing') {
+          // Time's up handled by server triggered results usually
         }
         return () => clearInterval(timer);
       }, [gameState, timeRemaining, hasAnswered]);
@@ -270,26 +515,88 @@
       const create = () => { setView('host'); socket.emit('create_room'); };
       const start = () => socket.emit('start_game', roomId);
       const next = () => socket.emit('next_question_request', roomId);
-      const submit = (i) => { setHasAnswered(true); socket.emit('submit_answer', { roomId, answerIndex: i, timeRemaining }); };
+      const submit = (i) => {
+        setHasAnswered(true);
+        socket.emit('submit_answer', { roomId, answerIndex: i, timeRemaining });
+        setLastAnswerCorrect(i === currentQ.answer);
+      };
+
+      const t = {
+        TH: {
+          home: "หน้าหลัก", about: "เกี่ยวกับเรา", lang: "EN",
+          join: "เข้าร่วมเกม", host: "สร้างห้อง", enter: "ตกลง",
+          pin: "รหัสห้อง (PIN)", nick: "ชื่อเล่น", start: "เริ่มเกม",
+          connecting: "กำลังเชื่อมต่อ...", waiting: "รอโฮสต์เริ่มเกม...",
+          players: "ผู้เล่นคนอื่นๆ", next: "ถัดไป", results: "ผลการจัดอันดับ",
+          correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ"
+        },
+        EN: {
+          home: "Home", about: "About", lang: "TH",
+          join: "Join Game", host: "Create Room", enter: "Enter",
+          pin: "Game PIN", nick: "Nickname", start: "Start",
+          connecting: "Connecting...", waiting: "Waiting for host...",
+          players: "Players", next: "Next", results: "Rankings",
+          correct: "Correct!", incorrect: "Wrong!", podium: "Final Ranking"
+        }
+      }[lang];
+
+      const Navbar = () => (
+        <nav className="navbar">
+          <div className="nav-logo" onClick={() => setPage('home')}>MATh! MASTER</div>
+          <div className="nav-links">
+            <div className="nav-item" onClick={() => setPage('home')}>{t.home}</div>
+            <div className="nav-item" onClick={() => setPage('about')}>{t.about}</div>
+            <div className="lang-toggle" onClick={() => setLang(lang === 'TH' ? 'EN' : 'TH')}>{t.lang}</div>
+          </div>
+        </nav>
+      );
+
+      if (page === 'about') return (
+        <div>
+          <Navbar />
+          <div className="page-content animate">
+            <div className="glass-card">
+              <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>About Us</h1>
+              <p style={{ fontSize: '1.2rem', lineHeight: '1.8', maxWidth: '800px', margin: '0 auto' }}>
+                พวกเราคือทีมผู้พัฒนาที่หลงใหลในคณิตศาสตร์และการศึกษา! <br />
+                เกมนี้ถูกสร้างขึ้นเพื่อให้น้องๆ ได้ฝึกทักษะเรื่อง "ลำดับและอนุกรม" ผ่านความตื่นเต้นเร้าใจในรูปแบบ Kahoot!
+              </p>
+              <div style={{ marginTop: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+                <div className="lb-item"><div>Developer</div> <b>Mangz</b></div>
+                <div className="lb-item"><div>Math Specialist</div> <b>Kru Math</b></div>
+              </div>
+              <button className="k-btn black" style={{ marginTop: '3rem' }} onClick={() => setPage('home')}>Go Back</button>
+            </div>
+          </div>
+        </div>
+      );
 
       return (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Navbar />
+
           {gameState === 'idle' && (
-            <div className="kahoot-auth">
-              <h1 style={{ fontSize: '4rem', marginBottom: '2rem' }}>Kahoot!</h1>
+            <div className="auth-container animate">
+              <div className="float" style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '5rem', fontWeight: 900, textShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>Kahoot!</h1>
+              </div>
               <div className="auth-card">
                 {view === 'join' ? (
                   <>
-                    <input className="kahoot-input" placeholder="Game PIN" value={roomId} onChange={e => setRoomId(e.target.value)} />
-                    <input className="kahoot-input" placeholder="Nickname" value={username} onChange={e => setUsername(e.target.value)} />
-                    <button className="kahoot-btn black" onClick={join}>Enter</button>
-                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer' }} onClick={() => setView('host')}>Host a game?</p>
+                    <div className="input-group">
+                      <input placeholder={t.pin} value={roomId} onChange={e => setRoomId(e.target.value)} />
+                    </div>
+                    <div className="input-group">
+                      <input placeholder={t.nick} value={username} onChange={e => setUsername(e.target.value)} />
+                    </div>
+                    <button className="k-btn" onClick={join}>{t.enter}</button>
+                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold' }} onClick={create}>หรือสร้างห้องใหม่?</p>
                   </>
                 ) : (
                   <>
-                    <h2 style={{ color: '#333', textAlign: 'center' }}>Host Dashboard</h2>
-                    <button className="kahoot-btn" onClick={create}>Generate PIN</button>
-                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer' }} onClick={() => setView('join')}>Back to Join</p>
+                    <h2 style={{ color: '#333', textAlign: 'center' }}>{t.host}</h2>
+                    <button className="k-btn" onClick={create}>Generate GAME PIN</button>
+                    <p style={{ color: '#666', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => setView('join')}>เข้าร่วมในฐานะผู้เล่น?</p>
                   </>
                 )}
               </div>
@@ -297,54 +604,107 @@
           )}
 
           {gameState === 'lobby' && (
-            <div className="lobby-view">
-              <h1 style={{ fontSize: '3rem' }}>{view === 'host' ? `Room PIN: ${roomId}` : "You're in!"}</h1>
-              {view === 'host' && <button className="kahoot-btn" style={{ marginTop: '1rem', padding: '1rem 3rem' }} onClick={start} disabled={players.length === 0}>Start Game</button>}
-              <div style={{ marginTop: '2rem', fontSize: '1.5rem' }}>{players.length} Players connected</div>
-              <div className="player-grid">
-                {players.map(p => <div key={p.id} className="player-tag">{p.username}</div>)}
+            <div className="page-content animate">
+              <div className="glass-card">
+                <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>{view === 'host' ? `GAME PIN: ${roomId}` : t.waiting}</h1>
+                {view === 'host' && (
+                  <button className="k-btn" style={{ padding: '1.5rem 5rem' }} onClick={start} disabled={players.length === 0}>{t.start}</button>
+                )}
+                <div style={{ marginTop: '3rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
+                  <h2>{players.length} {t.players}</h2>
+                  <div className="player-grid">
+                    {players.map(p => <div key={p.id} className="player-tag animate" style={{ fontSize: '1.2rem' }}>{p.username}</div>)}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {gameState === 'playing' && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div className="question-header">{currentQ?.question}</div>
-              <div className="middle-section">
-                <div className="stat-circle">{timeRemaining}</div>
-                <div className="formula-card">{currentQ?.formula}</div>
-                <div className="stat-circle">{answeredCount}</div>
+            <div className="game-view">
+              <div className="q-header animate">{currentQ?.question}</div>
+              <div className="game-mid">
+                <div className="stat-box float">{timeRemaining}</div>
+                <div className="formula-box animate">{currentQ?.formula}</div>
+                <div className="stat-box">{answeredCount}/{totalPlayers}</div>
+                <div className="time-bar-container">
+                  <div className="time-bar" style={{ width: `${(timeRemaining / 30) * 100}%` }}></div>
+                </div>
               </div>
               {view === 'join' ? (
                 !hasAnswered ? (
                   <div className="ans-grid">
-                    <button className="ans-btn red" onClick={() => submit(0)}>▲ {currentQ?.options[0]}</button>
-                    <button className="ans-btn blue" onClick={() => submit(1)}>◆ {currentQ?.options[1]}</button>
-                    <button className="ans-btn yellow" onClick={() => submit(2)}>● {currentQ?.options[2]}</button>
-                    <button className="ans-btn green" onClick={() => submit(3)}>■ {currentQ?.options[3]}</button>
+                    <button className="ans-btn red animate" onClick={() => submit(0)}><span className="shape">▲</span> {currentQ?.options[0]}</button>
+                    <button className="ans-btn blue animate" onClick={() => submit(1)}><span className="shape">◆</span> {currentQ?.options[1]}</button>
+                    <button className="ans-btn yellow animate" onClick={() => submit(2)}><span className="shape">●</span> {currentQ?.options[2]}</button>
+                    <button className="ans-btn green animate" onClick={() => submit(3)}><span className="shape">■</span> {currentQ?.options[3]}</button>
                   </div>
-                ) : <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'black', background: '#f2f2f2' }}>Waiting for others...</div>
+                ) : (
+                  <div className="results-overlay animate">
+                    <div className="results-title">√ {lang === 'TH' ? 'ได้รับคำตอบแล้ว!' : 'Answer Received!'}</div>
+                    <p style={{ fontSize: '1.5rem' }}>รอผลการจัดอันดับซักครู่...</p>
+                  </div>
+                )
               ) : (
-                <div style={{ padding: '2rem', background: '#f2f2f2', textAlign: 'center' }}>
-                  <button className="kahoot-btn" onClick={next}>Next Question ➜</button>
+                <div style={{ padding: '2rem', background: '#eee', textAlign: 'center' }}>
+                  <h2 style={{ color: '#333' }}>กำลังรอผู้เล่นคนอื่นๆ ตอบคำถาม...</h2>
+                </div>
+              )}
+            </div>
+          )}
+
+          {gameState === 'round_results' && (
+            <div className={`results-overlay animate ${view === 'join' ? (lastAnswerCorrect ? 'correct-bg' : 'incorrect-bg') : ''}`}>
+              {view === 'join' ? (
+                <div style={{ textAlign: 'center' }}>
+                  <div className="results-title">{lastAnswerCorrect ? t.correct : t.incorrect}</div>
+                  <p style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Current Rank: {roundData.leaderboard.findIndex(p => p.username === username) + 1}</p>
+                </div>
+              ) : (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Question Results</h2>
+                  <div className="chart-container">
+                    {roundData.distribution.map((count, i) => {
+                      const colors = ['#eb670f', '#1368ce', '#d89e00', '#26890c'];
+                      const shapes = ['▲', '◆', '●', '■'];
+                      const max = Math.max(...roundData.distribution) || 1;
+                      const correct = i === roundData.correctAnswer;
+                      return (
+                        <div key={i} className="chart-bar" style={{ height: `${(count / max) * 100}%`, background: colors[i], opacity: correct ? 1 : 0.6, border: correct ? '5px solid white' : 'none' }}>
+                          <span className="chart-count">{count}</span>
+                          <span className="chart-label">{shapes[i]}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="round-lb animate" style={{ marginTop: '5rem' }}>
+                    <h3 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Current Leaderboard</h3>
+                    {roundData.leaderboard.map((p, i) => (
+                      <div key={i} className="lb-item">
+                        <span><span className="lb-rank">{i + 1}</span> {p.username}</span>
+                        <b>{p.score}</b>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="k-btn" style={{ marginTop: '3rem', padding: '1rem 5rem' }} onClick={next}>{t.next}</button>
                 </div>
               )}
             </div>
           )}
 
           {gameState === 'results' && (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <h1 style={{ fontSize: '4rem' }}>Podium</h1>
+            <div className="results-overlay animate">
+              <h1 className="float" style={{ fontSize: '6rem' }}>{t.podium}</h1>
               <div className="podium-container">
                 {finalResults.slice(0, 3).map((p, i) => (
-                  <div key={i} className={`place-${i + 1}`} style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>{p.username}</div>
+                  <div key={i} className={`place-${i + 1} animate`} style={{ textAlign: 'center' }}>
+                    <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '10px' }}>{p.username}</div>
                     <div className="podium-bar">{i === 0 ? '1st' : i === 1 ? '2nd' : '3rd'}</div>
-                    <div style={{ marginTop: '5px' }}>{p.score} pts</div>
+                    <div style={{ marginTop: '10px', fontWeight: 'bold' }}>{p.score} pts</div>
                   </div>
                 ))}
               </div>
-              <button className="kahoot-btn" style={{ marginTop: '3rem' }} onClick={() => window.location.reload()}>Play Again</button>
+              <button className="k-btn" style={{ marginTop: '4rem', padding: '1.5rem 6rem' }} onClick={() => window.location.reload()}>Play Again</button>
             </div>
           )}
         </div>
