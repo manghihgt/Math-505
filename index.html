@@ -492,7 +492,6 @@
       const [gameState, setGameState] = useState('idle');
       const [roomId, setRoomId] = useState(paramRoom || '');
       const [username, setUsername] = useState('');
-      const [webhookUrl, setWebhookUrl] = useState(localStorage.getItem('math_webhook_url') || '');
       const [players, setPlayers] = useState([]);
       const [currentQ, setCurrentQ] = useState(null);
       const [timeRemaining, setTimeRemaining] = useState(30);
@@ -508,13 +507,12 @@
 
       // Handle Socket connection
       useEffect(() => {
-        if (!serverIp) return;
-        const newSocket = io(`http://${serverIp}:3001`, { transposition: false });
+        const socketHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
+        const newSocket = io(socketHost, { transposition: false });
         setSocket(newSocket);
-        localStorage.setItem('math_server_ip', serverIp);
 
         return () => newSocket.close();
-      }, [serverIp]);
+      }, []);
 
       useEffect(() => {
         if (!socket) return;
@@ -586,8 +584,7 @@
       const create = () => {
         setView('host');
         if (socket) {
-          socket.emit('create_room', { webhookUrl });
-          localStorage.setItem('math_webhook_url', webhookUrl);
+          socket.emit('create_room');
         }
       };
       const start = () => socket.emit('start_game', roomId);
@@ -605,9 +602,7 @@
           pin: "รหัสห้อง (PIN)", nick: "ชื่อเล่น", start: "เริ่มเกม",
           connecting: "กำลังเชื่อมต่อ...", waiting: "รอโฮสต์เริ่มเกม...",
           players: "ผู้เล่นคนอื่นๆ", next: "ถัดไป", results: "ผลการจัดอันดับ",
-          correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ",
-          server_ip: "เลข IP เครื่องเซิร์ฟเวอร์ (สำหรับมือถือ)",
-          webhook_label: "Discord Webhook (สำหรับแจ้งเตือนคนเข้า)"
+          correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ"
         },
         EN: {
           home: "Home", about: "About", lang: "TH",
@@ -615,9 +610,7 @@
           pin: "Game PIN", nick: "Nickname", start: "Start",
           connecting: "Connecting...", waiting: "Waiting for host...",
           players: "Players", next: "Next", results: "Rankings",
-          correct: "Correct!", incorrect: "Wrong!", podium: "Final Ranking",
-          server_ip: "Server IP (for mobile support)",
-          webhook_label: "Discord Webhook URL (for notifications)"
+          correct: "Correct!", incorrect: "Wrong!", podium: "Final Ranking"
         }
       }[lang];
 
@@ -674,24 +667,12 @@
                       <span className="input-label">{t.nick}</span>
                       <input placeholder="Ex. John" value={username} onChange={e => setUsername(e.target.value)} />
                     </div>
-                    <div className="input-group">
-                      <span className="input-label">{t.server_ip}</span>
-                      <input placeholder="localhost" value={serverIp} onChange={e => setServerIp(e.target.value)} style={{ fontSize: '0.9rem', opacity: 0.7 }} />
-                    </div>
                     <button className="k-btn" onClick={join}>{t.enter}</button>
                     <button className="k-btn ghost" onClick={create}>{lang === 'TH' ? 'หรือสร้างห้องใหม่?' : 'Or create a new room?'}</button>
                   </>
                 ) : (
                   <>
                     <h2 style={{ color: 'white', textAlign: 'center', marginBottom: '1rem' }}>{t.host}</h2>
-                    <div className="input-group">
-                      <p className="input-label">{t.server_ip}</p>
-                      <input placeholder="Host IP (e.g. 192.168.1.50)" value={serverIp} onChange={e => setServerIp(e.target.value)} />
-                    </div>
-                    <div className="input-group">
-                      <p className="input-label">{t.webhook_label}</p>
-                      <input placeholder="Discord Webhook URL" value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)} />
-                    </div>
                     <button className="k-btn" onClick={create}>Generate GAME PIN</button>
                     <button className="k-btn ghost" onClick={() => setView('join')}>{lang === 'TH' ? 'เข้าร่วมในฐานะผู้เล่น?' : 'Join as a player?'}</button>
                   </>
