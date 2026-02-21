@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MATH 5/5 Quiz Game</title>
+  <title>Math Challenge Quiz Game</title>
 
   <!-- Fonts & CDNs -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;700&display=swap"
@@ -98,9 +98,26 @@
       cursor: pointer;
       font-weight: 600;
       font-size: 1rem;
-      color: white;
-      opacity: 0.8;
+      color: var(--text-dim);
       transition: 0.3s;
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: white;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: white;
+      box-shadow: 0 0 10px white;
     }
 
     .nav-item:hover {
@@ -589,6 +606,7 @@
       const [finalResults, setFinalResults] = useState([]);
       const [lang, setLang] = useState('TH');
       const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
+      const [musicEnabled, setMusicEnabled] = useState(false);
 
       const [isScanning, setIsScanning] = useState(false);
       const scannerRef = useRef(null);
@@ -609,6 +627,13 @@
 
       useEffect(() => {
         if (!socket) return;
+
+        socket.on('server_info', (info) => {
+          if (info.networkIp) {
+            setServerIp(info.networkIp);
+            localStorage.setItem('math_server_ip', info.networkIp);
+          }
+        });
 
         socket.on('room_created', (id) => {
           setRoomId(id);
@@ -735,7 +760,8 @@
 
       const t = {
         TH: {
-          home: "หน้าหลัก", about: "เกี่ยวกับเรา", lang: "EN",
+          home: "หน้าหลัก", joinTab: "เข้าห้อง", about: "เกี่ยวกับเรา", settings: "ตั้งค่า",
+          langLabel: "ภาษา", musicLabel: "เสียงเพลง", on: "เปิด", off: "ปิด",
           join: "เข้าร่วมเกม", host: "สร้างห้อง", enter: "ตกลง",
           pin: "รหัสห้อง (PIN)", nick: "ชื่อเล่น", start: "เริ่มเกม",
           connecting: "กำลังเชื่อมต่อ...", waiting: "รอโฮสต์เริ่มเกม...",
@@ -743,7 +769,8 @@
           correct: "ถูกต้อง!", incorrect: "ผิดนะ!", podium: "ผู้ชนะ"
         },
         EN: {
-          home: "Home", about: "About", lang: "TH",
+          home: "Home", joinTab: "Join", about: "About Us", settings: "Settings",
+          langLabel: "Language", musicLabel: "Music", on: "ON", off: "OFF",
           join: "Join Game", host: "Create Room", enter: "Enter",
           pin: "Game PIN", nick: "Nickname", start: "Start",
           connecting: "Connecting...", waiting: "Waiting for host...",
@@ -754,71 +781,105 @@
 
       const Navbar = () => (
         <nav className="navbar">
-          <div className="nav-logo" onClick={() => setPage('home')}>MATH 5/5</div>
+          <div className="nav-logo" onClick={() => setPage('home')}>Math Challenge</div>
           <div className="nav-links">
-            <div className="nav-item" onClick={() => setPage('home')}>{t.home}</div>
-            <div className="nav-item" onClick={() => setPage('about')}>{t.about}</div>
-            <div className="lang-toggle" onClick={() => setLang(lang === 'TH' ? 'EN' : 'TH')}>{t.lang}</div>
+            <div className={`nav-item ${page === 'home' ? 'active' : ''}`} onClick={() => setPage('home')}>{t.home}</div>
+            <div className={`nav-item ${page === 'join' ? 'active' : ''}`} onClick={() => setPage('join')}>{t.joinTab}</div>
+            <div className={`nav-item ${page === 'about' ? 'active' : ''}`} onClick={() => setPage('about')}>{t.about}</div>
+            <div className={`nav-item ${page === 'settings' ? 'active' : ''}`} onClick={() => setPage('settings')}>{t.settings}</div>
           </div>
         </nav>
       );
 
-      if (page === 'about') return (
-        <div>
-          <Navbar />
+      // Pre-game page content
+      const PageContent = () => {
+        if (page === 'about') return (
           <div className="page-content animate">
             <div className="glass-card" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
-              <h1 style={{ fontSize: '3rem', marginBottom: '2rem', textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>สมาชิกกลุ่ม Math 5/5</h1>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+              <h1 style={{ fontSize: '3rem', marginBottom: '2rem', textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>{t.about}</h1>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.2rem', textAlign: 'left', maxWidth: '600px', margin: '0 auto' }}>
                 <div className="lb-item">นายกรณ์มิษฐ์ อินดา</div>
                 <div className="lb-item">นายนพกิจ สุรินทร์ต๊ะ</div>
                 <div className="lb-item">นายวุฒิภัทร จ่าหย่อง</div>
                 <div className="lb-item">นายสุริยะทิตย์ สุริยะวงค์</div>
                 <div className="lb-item">นายจตุรงค์ กิจโชคประเสริฐ</div>
               </div>
-              <button className="k-btn black" style={{ marginTop: '3rem', padding: '1rem 3rem' }} onClick={() => setPage('home')}>ย้อนกลับ</button>
             </div>
           </div>
-        </div>
-      );
+        );
+
+        if (page === 'settings') return (
+          <div className="page-content animate">
+            <div className="glass-card" style={{ maxWidth: '500px', width: '100%' }}>
+              <h1 style={{ fontSize: '2.5rem', marginBottom: '2.5rem' }}>{t.settings}</h1>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', textAlign: 'left' }}>
+                <div className="input-group">
+                  <span className="input-label" style={{ marginBottom: '1rem' }}>{t.langLabel}</span>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className={`k-btn ${lang === 'TH' ? '' : 'ghost'}`} onClick={() => setLang('TH')} style={{ flex: 1 }}>ไทย</button>
+                    <button className={`k-btn ${lang === 'EN' ? '' : 'ghost'}`} onClick={() => setLang('EN')} style={{ flex: 1 }}>English</button>
+                  </div>
+                </div>
+                <div className="input-group">
+                  <span className="input-label" style={{ marginBottom: '1rem' }}>{t.musicLabel}</span>
+                  <button className={`k-btn ${musicEnabled ? '' : 'ghost'}`} onClick={() => setMusicEnabled(!musicEnabled)}>
+                    {musicEnabled ? t.on : t.off}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+        if (page === 'join') return (
+          <div className="auth-container animate">
+            <div className="auth-card">
+              {view === 'join' ? (
+                <>
+                  <div className="input-group">
+                    <span className="input-label">{t.pin}</span>
+                    <input placeholder="1234" maxLength="4" value={roomId} onChange={e => setRoomId(e.target.value)} />
+                  </div>
+                  <div className="input-group">
+                    <span className="input-label">{t.nick}</span>
+                    <input placeholder="Ex. John" value={username} onChange={e => setUsername(e.target.value)} />
+                  </div>
+                  <button className="k-btn" onClick={join}>{t.enter}</button>
+                  <button className="k-btn ghost" onClick={toggleScanner}>📷 {lang === 'TH' ? 'สแกนคิวอาร์ (Scan QR)' : 'Scan QR Code'}</button>
+                  <button className="k-btn ghost" onClick={create}>{lang === 'TH' ? 'หรือสร้างห้องใหม่?' : 'Or create a new room?'}</button>
+                </>
+              ) : (
+                <>
+                  <h2 style={{ color: 'white', textAlign: 'center', marginBottom: '1rem' }}>{t.host}</h2>
+                  <button className="k-btn" onClick={create}>Generate GAME PIN</button>
+                  <button className="k-btn ghost" onClick={() => setView('join')}>{lang === 'TH' ? 'เข้าร่วมในฐานะผู้เล่น?' : 'Join as a player?'}</button>
+                </>
+              )}
+            </div>
+          </div>
+        );
+
+        // Home Page
+        return (
+          <div className="auth-container animate">
+            <div className="float" style={{ marginBottom: '2rem' }}>
+              <h1 className="hero-title">Math Challenge</h1>
+              <p style={{ fontSize: '1.2rem', opacity: 0.7, maxWidth: '600px', margin: '0 auto', marginBottom: '2rem' }}>
+                {lang === 'TH' ? 'ยกระดับการเรียนรู้คณิตศาสตร์ด้วยแพลตฟอร์มการแข่งขันแบบเรียลไทม์' : 'Accelerate math learning with a real-time collaborative platform.'}
+              </p>
+              <button className="k-btn" style={{ padding: '1.5rem 4rem', fontSize: '1.5rem' }} onClick={() => setPage('join')}>
+                {lang === 'TH' ? 'เริ่มเล่นเลย!' : 'Play Now!'}
+              </button>
+            </div>
+          </div>
+        );
+      };
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />
 
-          {gameState === 'idle' && (
-            <div className="auth-container animate">
-              <div className="float" style={{ marginBottom: '2rem' }}>
-                <h1 className="hero-title">MATH 5/5</h1>
-                <p style={{ fontSize: '1.2rem', opacity: 0.7, maxWidth: '600px', margin: '0 auto' }}>
-                  {lang === 'TH' ? 'ยกระดับการเรียนรู้คณิตศาสตร์ด้วยแพลตฟอร์มการแข่งขันแบบเรียลไทม์' : 'Accelerate math learning with a real-time collaborative platform.'}
-                </p>
-              </div>
-              <div className="auth-card">
-                {view === 'join' ? (
-                  <>
-                    <div className="input-group">
-                      <span className="input-label">{t.pin}</span>
-                      <input placeholder="1234" value={roomId} onChange={e => setRoomId(e.target.value)} />
-                    </div>
-                    <div className="input-group">
-                      <span className="input-label">{t.nick}</span>
-                      <input placeholder="Ex. John" value={username} onChange={e => setUsername(e.target.value)} />
-                    </div>
-                    <button className="k-btn" onClick={join}>{t.enter}</button>
-                    <button className="k-btn ghost" onClick={toggleScanner}>📷 {lang === 'TH' ? 'สแกนคิวอาร์ (Scan QR)' : 'Scan QR Code'}</button>
-                    <button className="k-btn ghost" onClick={create}>{lang === 'TH' ? 'หรือสร้างห้องใหม่?' : 'Or create a new room?'}</button>
-                  </>
-                ) : (
-                  <>
-                    <h2 style={{ color: 'white', textAlign: 'center', marginBottom: '1rem' }}>{t.host}</h2>
-                    <button className="k-btn" onClick={create}>Generate GAME PIN</button>
-                    <button className="k-btn ghost" onClick={() => setView('join')}>{lang === 'TH' ? 'เข้าร่วมในฐานะผู้เล่น?' : 'Join as a player?'}</button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
+          {gameState === 'idle' && <PageContent />}
 
           {gameState === 'lobby' && (
             <div className="page-content animate">
@@ -851,7 +912,9 @@
               <div className="q-header animate">{currentQ?.question}</div>
               <div className="game-mid">
                 <div className="stat-box float">{timeRemaining}</div>
-                <div className="formula-box animate">{currentQ?.formula}</div>
+                <div className="formula-box animate" style={{ color: '#fff', textShadow: '0 0 10px var(--accent)' }}>
+                  {currentQ?.formula || "aₙ = a₁ + (n-1)d"}
+                </div>
                 <div className="stat-box">{answeredCount}/{totalPlayers}</div>
                 <div className="time-bar-container">
                   <div className="time-bar" style={{ width: `${(timeRemaining / 30) * 100}%` }}></div>
