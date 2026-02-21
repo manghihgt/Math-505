@@ -15,6 +15,7 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     :root {
@@ -237,6 +238,54 @@
     .k-btn.ghost:hover {
       background: var(--glass-bright);
       border-color: white;
+    }
+
+    /* --- QR SCANNER --- */
+    #reader {
+      width: 100% !important;
+      border: none !important;
+      border-radius: 20px;
+      overflow: hidden;
+      background: black;
+    }
+
+    .scanner-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .scanner-box {
+      width: 100%;
+      max-width: 500px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 1rem;
+      border-radius: 30px;
+      position: relative;
+    }
+
+    .scanner-close {
+      position: absolute;
+      top: -50px;
+      right: 0;
+      background: white;
+      color: black;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      cursor: pointer;
     }
 
     /* --- GAMEPLAY --- */
@@ -541,12 +590,18 @@
       const [lang, setLang] = useState('TH');
       const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
 
-      const qrRef = useRef(null);
+      const [isScanning, setIsScanning] = useState(false);
+      const scannerRef = useRef(null);
 
       // Handle Socket connection
       useEffect(() => {
-        const socketHost = window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
-        const newSocket = io(socketHost, { transposition: false });
+        // If we are served via Express, the socket is on the same host/port
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? 'http://localhost:3001'
+          : `${window.location.protocol}//${window.location.host}`;
+
+        const newSocket = io(socketUrl, { transposition: false });
         setSocket(newSocket);
 
         return () => newSocket.close();
@@ -627,6 +682,51 @@
       };
       const start = () => socket.emit('start_game', roomId);
       const next = () => socket.emit('next_question_request', roomId);
+      const toggleScanner = () => {
+        if (!isScanning) {
+          setIsScanning(true);
+          setTimeout(() => {
+            scannerRef.current = new Html5Qrcode("reader");
+            scannerRef.current.start(
+              { facingMode: "environment" },
+              { fps: 10, qrbox: { width: 250, height: 250 } },
+              (decodedText) => {
+                // Parse URL
+                try {
+                  const url = new URL(decodedText);
+                  const room = url.searchParams.get('room');
+                  const host = url.searchParams.get('host');
+                  if (room) setRoomId(room);
+                  if (host) setServerIp(host);
+                  stopScanner();
+                } catch (e) {
+                  // If not a URL, maybe it's just the PIN?
+                  setRoomId(decodedText);
+                  stopScanner();
+                }
+              },
+              (errorMessage) => { /* ignore */ }
+            ).catch(err => console.error(err));
+          }, 300);
+        } else {
+          stopScanner();
+        }
+      };
+
+      const stopScanner = () => {
+        if (scannerRef.current) {
+          scannerRef.current.stop().then(() => {
+            scannerRef.current.clear();
+            setIsScanning(false);
+          }).catch(err => {
+            console.error(err);
+            setIsScanning(false);
+          });
+        } else {
+          setIsScanning(false);
+        }
+      };
+
       const submit = (i) => {
         setHasAnswered(true);
         socket.emit('submit_answer', { roomId, answerIndex: i, timeRemaining });
@@ -706,6 +806,7 @@
                       <input placeholder="Ex. John" value={username} onChange={e => setUsername(e.target.value)} />
                     </div>
                     <button className="k-btn" onClick={join}>{t.enter}</button>
+                    <button className="k-btn ghost" onClick={toggleScanner}>📷 {lang === 'TH' ? 'สแกนคิวอาร์ (Scan QR)' : 'Scan QR Code'}</button>
                     <button className="k-btn ghost" onClick={create}>{lang === 'TH' ? 'หรือสร้างห้องใหม่?' : 'Or create a new room?'}</button>
                   </>
                 ) : (
@@ -833,6 +934,16 @@
                 ))}
               </div>
               <button className="k-btn" style={{ marginTop: '4rem', padding: '1.5rem 6rem' }} onClick={() => window.location.reload()}>Play Again</button>
+            </div>
+          )}
+
+          {isScanning && (
+            <div className="scanner-modal animate">
+              <div className="scanner-box">
+                <div className="scanner-close" onClick={stopScanner}>✕</div>
+                <div id="reader"></div>
+                <p style={{ marginTop: '1rem', textAlign: 'center' }}>สแกน QR Code จากหน้าจอโฮสต์</p>
+              </div>
             </div>
           )}
         </div>
